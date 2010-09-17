@@ -17,16 +17,23 @@ while True:
             exit()
     
     pressed_keys = pygame.key.get_pressed()
+    
+    rotation_direction = 0.0
+    
     if pressed_keys[K_LEFT] and coordinates[movement_index].x > 0:
         movement_index -= 1
         aduka.face_left()
     elif pressed_keys[K_RIGHT] and coordinates[movement_index].x <= (SCREEN_SIZE[0] - aduka.get_width()):
         movement_index += 1
         aduka.face_right()
+    elif pressed_keys[K_UP]:
+        rotation_direction = +1.0
+    elif pressed_keys[K_DOWN]:
+        rotation_direction = -1.0
     
     aduka.set_position(coordinates[movement_index])
     
     draw_background(screen)
-    screen.blit(aduka.render(), aduka.get_position())
+    aduka.render(screen, rotation_direction)
     
     pygame.display.update()
