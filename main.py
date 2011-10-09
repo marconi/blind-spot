@@ -6,15 +6,21 @@ from math import *
 from screen import *
 from utils import load_coordinates, draw_background
 from mobile import Aduka
+from controls import draw_controls
 
 coordinates = load_coordinates()
 aduka = Aduka()
 movement_index = 0
+velocity = 0.0
 
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
+        elif event.type == KEYDOWN and event.key == K_SPACE:
+            velocity = 0.0
+        elif event.type == KEYUP and event.key == K_SPACE:
+            aduka.fire(velocity)
     
     pressed_keys = pygame.key.get_pressed()
     
@@ -30,10 +36,13 @@ while True:
         rotation_direction = +1.0
     elif pressed_keys[K_DOWN]:
         rotation_direction = -1.0
+    elif pressed_keys[K_SPACE]:
+        if (velocity + 1) <= 296:
+            velocity += 1
     
     aduka.set_position(coordinates[movement_index])
     
     draw_background(screen)
     aduka.render(screen, rotation_direction)
-    
+    draw_controls(screen, velocity)
     pygame.display.update()

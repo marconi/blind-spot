@@ -1,5 +1,6 @@
 import pygame
 from gameobjects.vector2 import Vector2
+import math
 
 class Mobile(object):
     left_face = None
@@ -7,14 +8,21 @@ class Mobile(object):
     angle = 90.0
     facing = 'right'
     position = Vector2(0, 0)
+    gravity = 9.8
+    dt = 0.07 # difference in time
     
     degree_pointer_img = 'resources/degree_pointer.png'
+    fireball = 'resources/fireball.png'
+    
+    velocity = 0
+    seconds = 0
     
     def __init__(self):
         self.degree_pointer = pygame.image.load(self.degree_pointer_img).convert_alpha()
         self.angle_font = pygame.font.SysFont("arial", 10)
         self.angle_font.set_bold(True)
-    
+        self.mobile_fire = pygame.image.load(self.fireball).convert_alpha()
+
     def face_left(self):
         self.facing = 'left'
     
@@ -36,14 +44,31 @@ class Mobile(object):
         
         angle_surface = self.angle_font.render(str(int(self.angle)), True, (127, 0, 108), (255, 255, 255))
         screen.blit(angle_surface, Vector2(pos.x, pos.y+(face.get_height()-angle_surface.get_height())))
-        
+
+        # check for firing
+        if self.velocity != 0:
+            angle = self.angle * (math.pi/180) # converted to radians
+            VelocityY = self.velocity * math.sin(angle)
+            VelocityX = self.velocity * math.cos(angle)
+
+            position = self.get_position()
+            initial_x, initial_y = position.x, position.y
+
+            self.seconds += self.dt
+            ball_x = initial_x + (VelocityX * self.seconds)
+            ball_y = initial_y - (VelocityY * self.seconds - .5 * self.gravity * self.seconds**2)
+            screen.blit(self.mobile_fire, (ball_x, ball_y))
+            if ball_y >= initial_y:
+                self.velocity = 0
+                self.seconds = 0
+
     def _get_new_rotated_pos(self, face, base_pos, target_angle):
-        if target_angle >= 0 and target_angle <=180:
+        if target_angle >= 20 and target_angle <=160:
             self.angle = target_angle
-        elif target_angle >= 180:
-            self.angle = 180.0
-        elif target_angle <= 0:
-            self.angle = 0.0
+        elif target_angle >= 160:
+            self.angle = 160.0
+        elif target_angle <= 20:
+            self.angle = 20.0
         rotated_pointer = pygame.transform.rotate(self.degree_pointer,
                                                   self.angle)
         w, h = rotated_pointer.get_size()
@@ -66,6 +91,9 @@ class Mobile(object):
     
     def set_angle(self, degree):
         self.angle = degree
+    
+    def fire(self, velocity_percentage):
+        self.velocity = velocity_percentage
 
 class Aduka(Mobile):
     
